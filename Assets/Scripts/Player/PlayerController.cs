@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float gravity = 20f;
     [SerializeField] private float rotationSpeed = 10f;
     [FormerlySerializedAs("coyoteTime")] [SerializeField] private float jumpBuffer = 0.1f;
+    [SerializeField] private Animator animator;
 
     private CharacterController characterController;
     private Vector2 moveInput;
@@ -57,7 +58,7 @@ public class PlayerController : MonoBehaviour
 
         // Calculate movement direction
         Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
-        moveDirection = transform.TransformDirection(moveDirection);
+        // moveDirection = transform.TransformDirection(moveDirection);
         moveDirection.Normalize(); // Ensure the diagonal movement isn't faster
 
         // Rotate towards the movement direction
@@ -65,6 +66,11 @@ public class PlayerController : MonoBehaviour
         {
             Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+            animator.SetBool("running", true);
+        }
+        else
+        {
+            animator.SetBool("running", false);
         }
 
         moveDirection *= moveSpeed;
@@ -76,6 +82,7 @@ public class PlayerController : MonoBehaviour
         if (isJumping && groundedPlayer)
         {
             jumpVector.y += jumpForce;
+            animator.SetTrigger("jump");
         }
 
         // Apply gravity
