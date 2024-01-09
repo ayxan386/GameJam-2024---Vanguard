@@ -1,5 +1,7 @@
 using System;
+using System.Net.NetworkInformation;
 using Cinemachine;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -26,7 +28,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask beaconLayer;
 
     [SerializeField] private float detectionRadius;
+    [Header("UI elements")]
     [SerializeField] private Image selectedColorImage;
+    [SerializeField] private GameObject eliminationPanel;
+    [SerializeField] private TextMeshProUGUI reachCountText;
 
     private CharacterController characterController;
     private Vector2 moveInput;
@@ -63,10 +68,17 @@ public class PlayerController : MonoBehaviour
         }
 
         GameController.OnNextStageStarted += OnNextStageStarted;
+        GameController.OnReachCountUpdate += OnReachCountUpdate;
+    }
+
+    private void OnReachCountUpdate(int current, int total)
+    {
+        reachCountText.text = $"{current}/{total}";
     }
 
     private void OnNextStageStarted(Color color)
     {
+        if(IsEliminated) return;
         selectedColor = color;
         color.a = 1f;
         selectedColorImage.color = color;
@@ -76,7 +88,7 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         if (!MainGameManager.Instance.CanMove
-            && !IsEliminated) return;
+            || IsEliminated) return;
 
         HandleMovement();
         CheckForBeacon();
@@ -84,14 +96,15 @@ public class PlayerController : MonoBehaviour
 
     private void CheckForBeacon()
     {
+        if(Reached) return;
         var allBeacons = Physics.SphereCastAll(transform.position, detectionRadius, Vector3.forward, detectionRadius, beaconLayer);
         foreach (var beacon in allBeacons)
         {
             if (beacon.transform.TryGetComponent(out Renderer rend))
             {
-                print($"Beacon detected {rend.material.color}");
                 if (rend.material.color == selectedColor)
                 {
+                    Reached = true;
                     OnReachedBeacon?.Invoke(this);
                 }
             }
@@ -173,5 +186,8 @@ public class PlayerController : MonoBehaviour
     public void SetEliminated()
     {
         IsEliminated = true;
+        selectedColorImage.gameObject.SetActive(false);
+        eliminationPanel.SetActive(true);
+        animator.SetBool("running", false);
     }
 }

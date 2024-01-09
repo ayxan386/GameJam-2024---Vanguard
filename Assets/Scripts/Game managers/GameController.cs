@@ -32,6 +32,7 @@ public class GameController : MonoBehaviour
     private bool CanContinue { get; set; }
 
     public static event Action<Color> OnNextStageStarted; 
+    public static event Action<int, int> OnReachCountUpdate; 
 
     private IEnumerator Start()
     {
@@ -47,8 +48,8 @@ public class GameController : MonoBehaviour
 
     private void OnPlayerReachedBeacon(PlayerController obj)
     {
-        print($"Player {obj.PlayerIndex} reached beacon");
         currentReached++;
+        currentReached = Mathf.Clamp(currentReached, 0, totalActiveAtStartOfStage);
                     
         if (currentReached + 1 >= totalActiveAtStartOfStage)
         {
@@ -62,6 +63,8 @@ public class GameController : MonoBehaviour
 
             CanContinue = true;
         }
+        
+        OnReachCountUpdate?.Invoke(currentReached, totalActiveAtStartOfStage);
     }
 
     private IEnumerator GameLoop()
@@ -82,6 +85,8 @@ public class GameController : MonoBehaviour
             {
                 if (!playerController.IsEliminated) totalActiveAtStartOfStage++;
             }
+            
+            OnReachCountUpdate?.Invoke(currentReached, totalActiveAtStartOfStage);
 
             for (int count = 0; count < stage.selectedBeaconCount; count++)
             {
