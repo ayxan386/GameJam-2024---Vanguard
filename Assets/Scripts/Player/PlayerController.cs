@@ -9,13 +9,17 @@ using UnityEngine.UI;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
+    [Header("Movement")]
     [SerializeField] private PlayerInput playerInput;
-
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 8f;
     [SerializeField] private float gravity = 20f;
     [SerializeField] private float rotationSpeed = 10f;
     [FormerlySerializedAs("coyoteTime")] [SerializeField] private float jumpBuffer = 0.1f;
+    [Header("Sprinting")]
+    [SerializeField] private float sprintBoost = 8.5f;
+    [SerializeField] private float sprintDuration;
+    [SerializeField] private Image sprintImage;
     [SerializeField] private Animator animator;
 
     [Header("cameras")]
@@ -27,8 +31,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask beaconLayer;
 
     [SerializeField] private float detectionRadius;
+
     [Header("UI elements")]
     [SerializeField] private Image selectedColorImage;
+
     [SerializeField] private GameObject eliminationPanel;
     [SerializeField] private TextMeshProUGUI reachCountText;
 
@@ -44,13 +50,17 @@ public class PlayerController : MonoBehaviour
     private bool isJumping;
     private bool groundedPlayer;
     private float jumpTime;
+    private float sprintTime;
     private Color selectedColor;
+    private bool isSprinting;
+    private float speedMult = 1;
 
     public int PlayerIndex => playerInput.playerIndex;
     public bool IsEliminated { get; set; }
     public bool Reached { get; set; }
+    public bool IsFrozen { get; set; }
 
-    public static event Action<PlayerController> OnReachedBeacon; 
+    public static event Action<PlayerController> OnReachedBeacon;
 
     private void Start()
     {
@@ -65,7 +75,7 @@ public class PlayerController : MonoBehaviour
         //add the layer
         for (var index = 0; index < MainGameManager.Instance.PlayerLayers.Length; index++)
         {
-            if(index == PlayerIndex) continue;
+            if (index == PlayerIndex) continue;
             var layer = MainGameManager.Instance.PlayerLayers[index];
             int layerToRemove = (int)Mathf.Log(layer.value, 2);
             playerCamera.cullingMask &= ~(1 << layerToRemove);
@@ -82,7 +92,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnNextStageStarted(Color color)
     {
-        if(IsEliminated) return;
+        if (IsEliminated) return;
         selectedColor = color;
         color.a = 1f;
         selectedColorImage.color = color;
@@ -94,6 +104,7 @@ public class PlayerController : MonoBehaviour
         if (!MainGameManager.Instance.CanMove
             || IsEliminated) return;
 
+        ApplySprintTimes();
         HandleMovement();
         CheckForBeacon();
         CheckForPowerUp();
@@ -102,8 +113,8 @@ public class PlayerController : MonoBehaviour
     private void CheckForPowerUp()
     {
         var basePos = transform.position;
-        
-        var allPowerUps = Physics.CapsuleCastAll(basePos - Vector3.up, basePos + Vector3.up, 
+
+        var allPowerUps = Physics.CapsuleCastAll(basePos - Vector3.up, basePos + Vector3.up,
             powerUpDetectionRadius,
             Vector3.up, powerUpDetectionRadius, powerUpLayers);
 
@@ -118,8 +129,9 @@ public class PlayerController : MonoBehaviour
 
     private void CheckForBeacon()
     {
-        if(Reached) return;
-        var allBeacons = Physics.SphereCastAll(transform.position, detectionRadius, Vector3.forward, detectionRadius, beaconLayer);
+        if (Reached) return;
+        var allBeacons = Physics.SphereCastAll(transform.position, detectionRadius, Vector3.forward, detectionRadius,
+            beaconLayer);
         foreach (var beacon in allBeacons)
         {
             if (beacon.transform.TryGetComponent(out Renderer rend))
@@ -135,9 +147,9 @@ public class PlayerController : MonoBehaviour
 
     public void TemporaryBoostForSpeed(float mult)
     {
-        moveSpeed *= mult;
+        speedMult = mult;
     }
-    
+
     public void MoveTo(Transform location)
     {
         characterController.enabled = false;
@@ -150,6 +162,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
+        if(IsFrozen) return;
         groundedPlayer = characterController.isGrounded;
         if (groundedPlayer && jumpVector.y < 0)
         {
@@ -159,26 +172,22 @@ public class PlayerController : MonoBehaviour
         // Calculate movement direction
         Vector3 moveDirection = new Vector3(0, 0f, moveInput.y);
         moveDirection = transform.TransformDirection(moveDirection);
-        moveDirection.Normalize(); 
+        moveDirection.Normalize();
 
-        
+
         transform.Rotate(Vector3.up, moveInput.x * rotationSpeed * Time.deltaTime);
-        // Rotate towards the movement direction
         if (moveDirection != Vector3.zero)
         {
-            // if (moveInput.y >= 0)
-            // {
-            //     Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-            //     transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
-            // }
+        
             animator.SetBool("running", true);
         }
         else
         {
             animator.SetBool("running", false);
         }
+        
 
-        moveDirection *= moveSpeed;
+        moveDirection *= (isSprinting ? sprintBoost : moveSpeed) * speedMult;
 
         // Move the character controller
         characterController.Move(moveDirection * Time.deltaTime);
@@ -204,12 +213,37 @@ public class PlayerController : MonoBehaviour
         characterController.Move(jumpVector * Time.deltaTime);
     }
 
-    private void OnMove(InputValue val)
+    private void ApplySprintTimes()
     {
-        moveInput = val.Get<Vector2>();
+        sprintTime += (isSprinting ? -1 : 1) * Time.deltaTime;
+        sprintTime = Mathf.Clamp(sprintTime, 0, sprintDuration);
+
+        if (sprintTime <= 0)
+        {
+            isSprinting = false;
+        }
+
+        sprintImage.fillAmount = sprintTime / sprintDuration;
     }
 
-    private void OnJump()
+    public void OnSprint(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            isSprinting = true;
+        }
+        else if (ctx.canceled)
+        {
+            isSprinting = false;
+        }
+    }
+
+    public void OnMove(InputAction.CallbackContext ctx)
+    {
+        moveInput = ctx.ReadValue<Vector2>();
+    }
+
+    public void OnJump()
     {
         isJumping = true;
         jumpTime = Time.time;
