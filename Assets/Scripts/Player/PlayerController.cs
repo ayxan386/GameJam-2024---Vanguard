@@ -1,7 +1,9 @@
+using System;
 using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -20,6 +22,12 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private Camera playerCamera;
 
+    [Header("Beacon detection")]
+    [SerializeField] private LayerMask beaconLayer;
+
+    [SerializeField] private float detectionRadius;
+    [SerializeField] private Image selectedColorImage;
+
     private CharacterController characterController;
     private Vector2 moveInput;
     private Vector3 jumpVector;
@@ -27,8 +35,13 @@ public class PlayerController : MonoBehaviour
     private bool isJumping;
     private bool groundedPlayer;
     private float jumpTime;
+    private Color selectedColor;
 
     public int PlayerIndex => playerInput.playerIndex;
+    public bool IsEliminated { get; set; }
+    public bool Reached { get; set; }
+
+    public static event Action<PlayerController> OnReachedBeacon; 
 
     private void Start()
     {
@@ -41,14 +54,48 @@ public class PlayerController : MonoBehaviour
         //set the layer
         virtualCamera.gameObject.layer = layerToAdd;
         //add the layer
-        playerCamera.cullingMask &= ~(1 << layerToAdd);
+        for (var index = 0; index < MainGameManager.Instance.PlayerLayers.Length; index++)
+        {
+            if(index == PlayerIndex) continue;
+            var layer = MainGameManager.Instance.PlayerLayers[index];
+            int layerToRemove = (int)Mathf.Log(layer.value, 2);
+            playerCamera.cullingMask &= ~(1 << layerToRemove);
+        }
+
+        GameController.OnNextStageStarted += OnNextStageStarted;
+    }
+
+    private void OnNextStageStarted(Color color)
+    {
+        selectedColor = color;
+        color.a = 1f;
+        selectedColorImage.color = color;
+        Reached = false;
     }
 
     private void Update()
     {
-        if (!MainGameManager.Instance.CanMove) return;
+        if (!MainGameManager.Instance.CanMove
+            && !IsEliminated) return;
 
         HandleMovement();
+        CheckForBeacon();
+    }
+
+    private void CheckForBeacon()
+    {
+        var allBeacons = Physics.SphereCastAll(transform.position, detectionRadius, Vector3.forward, detectionRadius, beaconLayer);
+        foreach (var beacon in allBeacons)
+        {
+            if (beacon.transform.TryGetComponent(out Renderer rend))
+            {
+                print($"Beacon detected {rend.material.color}");
+                if (rend.material.color == selectedColor)
+                {
+                    OnReachedBeacon?.Invoke(this);
+                }
+            }
+        }
     }
 
     public void MoveTo(Transform location)
@@ -121,5 +168,10 @@ public class PlayerController : MonoBehaviour
     {
         isJumping = true;
         jumpTime = Time.time;
+    }
+
+    public void SetEliminated()
+    {
+        IsEliminated = true;
     }
 }
