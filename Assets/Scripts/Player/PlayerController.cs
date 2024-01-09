@@ -1,5 +1,4 @@
 using System;
-using System.Net.NetworkInformation;
 using Cinemachine;
 using TMPro;
 using UnityEngine;
@@ -32,6 +31,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Image selectedColorImage;
     [SerializeField] private GameObject eliminationPanel;
     [SerializeField] private TextMeshProUGUI reachCountText;
+
+    [Header("Power ups")]
+    [SerializeField] private LayerMask powerUpLayers;
+
+    [SerializeField] private float powerUpDetectionRadius;
 
     private CharacterController characterController;
     private Vector2 moveInput;
@@ -92,6 +96,24 @@ public class PlayerController : MonoBehaviour
 
         HandleMovement();
         CheckForBeacon();
+        CheckForPowerUp();
+    }
+
+    private void CheckForPowerUp()
+    {
+        var basePos = transform.position;
+        
+        var allPowerUps = Physics.CapsuleCastAll(basePos - Vector3.up, basePos + Vector3.up, 
+            powerUpDetectionRadius,
+            Vector3.up, powerUpDetectionRadius, powerUpLayers);
+
+        foreach (var powerUpHit in allPowerUps)
+        {
+            if (powerUpHit.transform.TryGetComponent(out PowerUp powerUp))
+            {
+                powerUp.Use(this);
+            }
+        }
     }
 
     private void CheckForBeacon()
@@ -111,6 +133,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void TemporaryBoostForSpeed(float mult)
+    {
+        moveSpeed *= mult;
+    }
+    
     public void MoveTo(Transform location)
     {
         characterController.enabled = false;

@@ -1198,6 +1198,10 @@ MonoBehaviour:
   selectedColorImage: {fileID: 6502922663586838224}
   eliminationPanel: {fileID: 1286861118739370722}
   reachCountText: {fileID: 4799255382669536694}
+  powerUpLayers:
+    serializedVersion: 2
+    m_Bits: 2048
+  powerUpDetectionRadius: 1
 --- !u!1 &8640549398641919685
 GameObject:
   m_ObjectHideFlags: 0
