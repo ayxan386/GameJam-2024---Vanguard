@@ -157,15 +157,20 @@ public class PlayerController : MonoBehaviour
         }
 
         // Calculate movement direction
-        Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
+        Vector3 moveDirection = new Vector3(0, 0f, moveInput.y);
         moveDirection = transform.TransformDirection(moveDirection);
-        moveDirection.Normalize(); // Ensure the diagonal movement isn't faster
+        moveDirection.Normalize(); 
 
+        
+        transform.Rotate(Vector3.up, moveInput.x * rotationSpeed * Time.deltaTime);
         // Rotate towards the movement direction
         if (moveDirection != Vector3.zero)
         {
-            Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+            // if (moveInput.y >= 0)
+            // {
+            //     Quaternion toRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+            //     transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, rotationSpeed * Time.deltaTime);
+            // }
             animator.SetBool("running", true);
         }
         else
