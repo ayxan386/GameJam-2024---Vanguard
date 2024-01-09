@@ -16,6 +16,9 @@ public class MainGameManager : MonoBehaviour
 
     public bool CanMove { get; private set; }
 
+    [field: SerializeField]
+    public LayerMask[] PlayerLayers { get; private set; }
+
     public static MainGameManager Instance { get; private set; }
 
     public void PlayerJoined(PlayerController player)

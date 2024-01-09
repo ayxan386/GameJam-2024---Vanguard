@@ -1,3 +1,4 @@
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -14,6 +15,11 @@ public class PlayerController : MonoBehaviour
     [FormerlySerializedAs("coyoteTime")] [SerializeField] private float jumpBuffer = 0.1f;
     [SerializeField] private Animator animator;
 
+    [Header("cameras")]
+    [SerializeField] private CinemachineVirtualCamera virtualCamera;
+
+    [SerializeField] private Camera playerCamera;
+
     private CharacterController characterController;
     private Vector2 moveInput;
     private Vector3 jumpVector;
@@ -29,6 +35,13 @@ public class PlayerController : MonoBehaviour
         characterController = GetComponent<CharacterController>();
 
         MainGameManager.Instance.PlayerJoined(this);
+
+        var layerMask = MainGameManager.Instance.PlayerLayers[PlayerIndex];
+        int layerToAdd = (int)Mathf.Log(layerMask.value, 2);
+        //set the layer
+        virtualCamera.gameObject.layer = layerToAdd;
+        //add the layer
+        playerCamera.cullingMask &= ~(1 << layerToAdd);
     }
 
     private void Update()
@@ -58,7 +71,7 @@ public class PlayerController : MonoBehaviour
 
         // Calculate movement direction
         Vector3 moveDirection = new Vector3(moveInput.x, 0f, moveInput.y);
-        // moveDirection = transform.TransformDirection(moveDirection);
+        moveDirection = transform.TransformDirection(moveDirection);
         moveDirection.Normalize(); // Ensure the diagonal movement isn't faster
 
         // Rotate towards the movement direction
