@@ -7,12 +7,12 @@ AvatarMask:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Hands
-  m_Mask: 00000000000000000000000000000000000000000100000001000000010000000100000001000000010000000100000001000000
+  m_Mask: 00000000000000000000000000000000000000000100000001000000010000000100000000000000000000000100000001000000
   m_Elements:
   - m_Path: 
     m_Weight: 1
   - m_Path: Gamejam_character:Hips
-    m_Weight: 1
+    m_Weight: 0
   - m_Path: Gamejam_character:Hips/Gamejam_character:LeftUpLeg
     m_Weight: 1
   - m_Path: Gamejam_character:Hips/Gamejam_character:LeftUpLeg/Gamejam_character:LeftLeg
@@ -142,4 +142,4 @@ AvatarMask:
   - m_Path: Gamejam_character:Hips/Gamejam_character:Spine/Gamejam_character:Spine1/Gamejam_character:Spine2/Gamejam_character:RightShoulder/Gamejam_character:RightArm/Gamejam_character:RightForeArm/Gamejam_character:RightHand/Gamejam_character:RightHandThumb1/Gamejam_character:RightHandThumb2/Gamejam_character:RightHandThumb3/Gamejam_character:RightHandThumb4
     m_Weight: 1
   - m_Path: Gamejam_character:Mesh
-    m_Weight: 1
+    m_Weight: 0

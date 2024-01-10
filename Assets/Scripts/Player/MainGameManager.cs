@@ -32,9 +32,12 @@ public class MainGameManager : MonoBehaviour
         }
 
         Players.Add(player);
+
         var playerIndex = player.PlayerIndex;
+        player.PlayerColor = playerColors[playerIndex];
+
         Instantiate(joinedIndicatorPrefab, indicatorParent).UpdateDisplay(
-            playerColors[playerIndex], "P" + playerIndex);
+            playerColors[playerIndex], $"P{playerIndex + 1}");
 
         player.MoveTo(spawnLocation);
     }

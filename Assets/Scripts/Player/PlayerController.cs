@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float gravity = 20f;
     [SerializeField] private float rotationSpeed = 10f;
     [FormerlySerializedAs("coyoteTime")] [SerializeField] private float jumpBuffer = 0.1f;
+    
     [Header("Sprinting")]
     [SerializeField] private float sprintBoost = 8.5f;
     [SerializeField] private float sprintDuration;
@@ -24,24 +25,23 @@ public class PlayerController : MonoBehaviour
 
     [Header("cameras")]
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
-
     [SerializeField] private Camera playerCamera;
 
     [Header("Beacon detection")]
     [SerializeField] private LayerMask beaconLayer;
-
     [SerializeField] private float detectionRadius;
 
     [Header("UI elements")]
     [SerializeField] private Image selectedColorImage;
-
     [SerializeField] private GameObject eliminationPanel;
     [SerializeField] private TextMeshProUGUI reachCountText;
 
     [Header("Power ups")]
     [SerializeField] private LayerMask powerUpLayers;
-
     [SerializeField] private float powerUpDetectionRadius;
+
+    [Header("Player indicator")]
+    [SerializeField] private Renderer colorIndicator;
 
     private CharacterController characterController;
     private Vector2 moveInput;
@@ -59,6 +59,7 @@ public class PlayerController : MonoBehaviour
     public bool IsEliminated { get; set; }
     public bool Reached { get; set; }
     public bool IsFrozen { get; set; }
+    public Color PlayerColor { get; set; }
 
     public static event Action<PlayerController> OnReachedBeacon;
 
@@ -68,6 +69,15 @@ public class PlayerController : MonoBehaviour
 
         MainGameManager.Instance.PlayerJoined(this);
 
+        CameraLayerSettings();
+        colorIndicator.material.color = PlayerColor;
+
+        GameController.OnNextStageStarted += OnNextStageStarted;
+        GameController.OnReachCountUpdate += OnReachCountUpdate;
+    }
+
+    private void CameraLayerSettings()
+    {
         var layerMask = MainGameManager.Instance.PlayerLayers[PlayerIndex];
         int layerToAdd = (int)Mathf.Log(layerMask.value, 2);
         //set the layer
@@ -80,9 +90,6 @@ public class PlayerController : MonoBehaviour
             int layerToRemove = (int)Mathf.Log(layer.value, 2);
             playerCamera.cullingMask &= ~(1 << layerToRemove);
         }
-
-        GameController.OnNextStageStarted += OnNextStageStarted;
-        GameController.OnReachCountUpdate += OnReachCountUpdate;
     }
 
     private void OnReachCountUpdate(int current, int total)
