@@ -42,6 +42,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Player indicator")]
     [SerializeField] private Renderer colorIndicator;
+    [SerializeField] private ThrowableObject throwable;
 
     private CharacterController characterController;
     private Vector2 moveInput;
@@ -155,6 +156,8 @@ public class PlayerController : MonoBehaviour
     public void TemporaryBoostForSpeed(float mult)
     {
         speedMult = mult;
+
+        IsFrozen = mult == 0;
     }
 
     public void MoveTo(Transform location)
@@ -225,6 +228,14 @@ public class PlayerController : MonoBehaviour
         }
 
         sprintImage.fillAmount = sprintTime / sprintDuration;
+    }
+
+    public void OnThrow(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed)
+        {
+            throwable.Throw();
+        }
     }
 
     public void OnSprint(InputAction.CallbackContext ctx)
