@@ -176,16 +176,10 @@ public class PlayerController : MonoBehaviour
 
 
         transform.Rotate(Vector3.up, moveInput.x * rotationSpeed * Time.deltaTime);
-        if (moveDirection != Vector3.zero)
-        {
         
-            animator.SetBool("running", true);
-        }
-        else
-        {
-            animator.SetBool("running", false);
-        }
-        
+        animator.SetBool("running", moveDirection != Vector3.zero);
+        animator.SetBool("walking", moveDirection == Vector3.zero && moveInput.x != 0);
+
 
         moveDirection *= (isSprinting ? sprintBoost : moveSpeed) * speedMult;
 
@@ -254,6 +248,8 @@ public class PlayerController : MonoBehaviour
         IsEliminated = true;
         selectedColorImage.gameObject.SetActive(false);
         eliminationPanel.SetActive(true);
+        characterController.enabled = false;
         animator.SetBool("running", false);
+        animator.SetTrigger("dead");
     }
 }
