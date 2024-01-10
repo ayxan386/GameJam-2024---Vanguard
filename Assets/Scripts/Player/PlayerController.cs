@@ -11,38 +11,46 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] private PlayerInput playerInput;
+
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 8f;
     [SerializeField] private float gravity = 20f;
     [SerializeField] private float rotationSpeed = 10f;
     [FormerlySerializedAs("coyoteTime")] [SerializeField] private float jumpBuffer = 0.1f;
-    
+
     [Header("Sprinting")]
     [SerializeField] private float sprintBoost = 8.5f;
+
     [SerializeField] private float sprintDuration;
     [SerializeField] private Image sprintImage;
     [SerializeField] private Animator animator;
 
     [Header("cameras")]
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
+
     [SerializeField] private Camera playerCamera;
 
     [Header("Beacon detection")]
     [SerializeField] private LayerMask beaconLayer;
+
     [SerializeField] private float detectionRadius;
 
     [Header("UI elements")]
     [SerializeField] private Image selectedColorImage;
+
     [SerializeField] private GameObject eliminationPanel;
     [SerializeField] private TextMeshProUGUI reachCountText;
 
     [Header("Power ups")]
     [SerializeField] private LayerMask powerUpLayers;
+
     [SerializeField] private float powerUpDetectionRadius;
 
     [Header("Player indicator")]
     [SerializeField] private Renderer colorIndicator;
-    [SerializeField] private ThrowableObject throwable;
+
+    [field:SerializeField] public ThrowableObject Throwable { get; set; }
+    [field:SerializeField] public HandAnimator handAnimator { get; private set; }
 
     private CharacterController characterController;
     private Vector2 moveInput;
@@ -172,7 +180,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-        if(IsFrozen) return;
+        if (IsFrozen) return;
         groundedPlayer = characterController.isGrounded;
         if (groundedPlayer && jumpVector.y < 0)
         {
@@ -186,7 +194,7 @@ public class PlayerController : MonoBehaviour
 
 
         transform.Rotate(Vector3.up, moveInput.x * rotationSpeed * Time.deltaTime);
-        
+
         animator.SetBool("running", moveDirection != Vector3.zero);
         animator.SetBool("walking", moveDirection == Vector3.zero && moveInput.x != 0);
 
@@ -232,9 +240,10 @@ public class PlayerController : MonoBehaviour
 
     public void OnThrow(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        if (ctx.performed && Throwable != null)
         {
-            throwable.Throw();
+            handAnimator.StopHolding(Throwable, transform.forward);
+            Throwable = null;
         }
     }
 

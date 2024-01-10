@@ -6,15 +6,16 @@ using Random = UnityEngine.Random;
 
 public class GameController : MonoBehaviour
 {
-    [Header("Ground detection")]
-    [SerializeField] private Transform bottomLeft, bottomRight, topLeft;
+    // [Header("Ground detection")]
+    // [SerializeField] private Transform bottomLeft, bottomRight, topLeft;
+    //
+    // [SerializeField] private Vector2Int stepSize;
+    // [SerializeField] private float checkRadius;
+    // [SerializeField] private LayerMask groundLayer;
+    //
+    // [SerializeField] private bool showGizmos;
 
-    [SerializeField] private Vector2Int stepSize;
-    [SerializeField] private float checkRadius;
-    [SerializeField] private LayerMask groundLayer;
-
-    [SerializeField] private bool showGizmos;
-
+    [SerializeField] private List<Transform> lightPoints;
     [Header("Game play")]
     [SerializeField] private Renderer beaconPrefab;
 
@@ -31,17 +32,17 @@ public class GameController : MonoBehaviour
     private int currentReached;
     private bool CanContinue { get; set; }
 
-    public static event Action<Color> OnNextStageStarted; 
-    public static event Action<int, int> OnReachCountUpdate; 
+    public static event Action<Color> OnNextStageStarted;
+    public static event Action<int, int> OnReachCountUpdate;
 
     private IEnumerator Start()
     {
-        FindAllPoints();
+        SetLights();
         SpawnAllBeacons();
 
         yield return new WaitUntil(() => MainGameManager.Instance.CanMove);
-        
-        PlayerController.OnReachedBeacon += OnPlayerReachedBeacon; 
+
+        PlayerController.OnReachedBeacon += OnPlayerReachedBeacon;
 
         StartCoroutine(GameLoop());
     }
@@ -50,7 +51,7 @@ public class GameController : MonoBehaviour
     {
         currentReached++;
         currentReached = Mathf.Clamp(currentReached, 0, totalActiveAtStartOfStage);
-                    
+
         if (currentReached + 1 >= totalActiveAtStartOfStage)
         {
             foreach (var player in MainGameManager.Instance.Players)
@@ -63,16 +64,18 @@ public class GameController : MonoBehaviour
 
             CanContinue = true;
         }
-        
+
         OnReachCountUpdate?.Invoke(currentReached, totalActiveAtStartOfStage);
     }
 
     private IEnumerator GameLoop()
     {
+        if(beacons.Count <= 0) yield break;
+        
         foreach (var stage in stages)
         {
             yield return new WaitForSeconds(waitBetweenStages);
-            
+
             foreach (var beacon in beacons)
             {
                 beacon.gameObject.SetActive(false);
@@ -80,12 +83,12 @@ public class GameController : MonoBehaviour
 
             totalActiveAtStartOfStage = 0;
             currentReached = 0;
-            
+
             foreach (var playerController in MainGameManager.Instance.Players)
             {
                 if (!playerController.IsEliminated) totalActiveAtStartOfStage++;
             }
-            
+
             OnReachCountUpdate?.Invoke(currentReached, totalActiveAtStartOfStage);
 
             for (int count = 0; count < stage.selectedBeaconCount; count++)
@@ -105,26 +108,35 @@ public class GameController : MonoBehaviour
         }
     }
 
-    [ContextMenu("Find all points")]
-    public void FindAllPoints()
+    public void SetLights()
     {
         emptyPoints = new List<Vector3>();
-        for (int posY = 0; posY <= stepSize.y; posY++)
+        foreach (var point in lightPoints)
         {
-            var bottomLeftPosition = bottomLeft.position;
-            var offset = Vector3.Lerp(bottomLeftPosition, topLeft.position, 1f * posY / stepSize.y) -
-                         bottomLeftPosition;
-            for (int posX = 0; posX <= stepSize.x; posX++)
-            {
-                var pos = Vector3.Lerp(bottomLeftPosition, bottomRight.position, 1f * posX / stepSize.x) + offset;
-
-                if (Physics.CheckSphere(pos, checkRadius, groundLayer))
-                {
-                    emptyPoints.Add(pos);
-                }
-            }
+            emptyPoints.Add(point.position);
         }
     }
+
+    // [ContextMenu("Find all points")]
+    // public void FindAllPoints()
+    // {
+    //     emptyPoints = new List<Vector3>();
+    //     for (int posY = 0; posY <= stepSize.y; posY++)
+    //     {
+    //         var bottomLeftPosition = bottomLeft.position;
+    //         var offset = Vector3.Lerp(bottomLeftPosition, topLeft.position, 1f * posY / stepSize.y) -
+    //                      bottomLeftPosition;
+    //         for (int posX = 0; posX <= stepSize.x; posX++)
+    //         {
+    //             var pos = Vector3.Lerp(bottomLeftPosition, bottomRight.position, 1f * posX / stepSize.x) + offset;
+    //
+    //             if (Physics.CheckSphere(pos, checkRadius, groundLayer))
+    //             {
+    //                 emptyPoints.Add(pos);
+    //             }
+    //         }
+    //     }
+    // }
 
     private void SpawnAllBeacons()
     {
@@ -137,17 +149,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        if (!showGizmos) return;
 
-        Gizmos.color = Color.blue;
-
-        foreach (var emptyPoint in emptyPoints)
-        {
-            Gizmos.DrawSphere(emptyPoint, checkRadius);
-        }
-    }
 }
 
 [Serializable]

@@ -12,28 +12,31 @@ public class ThrowableObject : MonoBehaviour
     [SerializeField] private float effectDistance;
     [SerializeField] private float stirringDelay = 1.5f;
     private bool allowStirring;
+    private bool allowDetection;
 
-    public void Throw()
+    public void Throw(Vector3 dir)
     {
         coll.enabled = true;
         transform.parent = null;
         rb.isKinematic = false;
-        rb.AddForce(transform.forward * force, ForceMode.Impulse);
+        rb.AddForce(dir * force, ForceMode.Impulse);
         StartCoroutine(DelayAndSet());
-
         Destroy(gameObject, lifespan);
     }
 
     private IEnumerator DelayAndSet()
     {
+        yield return null;
+        yield return null;
+        yield return null;
+        allowDetection = true;
         yield return new WaitForSeconds(stirringDelay);
-
         allowStirring = true;
     }
 
     private void FixedUpdate()
     {
-        if (!allowStirring) return;
+        if (!allowStirring || !allowDetection) return;
         var minDist = effectDistance;
         Vector3 targetPoint = Vector3.zero;
         foreach (var player in MainGameManager.Instance.Players)
