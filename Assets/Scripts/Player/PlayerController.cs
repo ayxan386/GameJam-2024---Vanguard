@@ -11,13 +11,16 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] private PlayerInput playerInput;
+
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 8f;
     [SerializeField] private float gravity = 20f;
     [SerializeField] private float rotationSpeed = 10f;
     [FormerlySerializedAs("coyoteTime")] [SerializeField] private float jumpBuffer = 0.1f;
+
     [Header("Sprinting")]
     [SerializeField] private float sprintBoost = 8.5f;
+
     [SerializeField] private float sprintDuration;
     [SerializeField] private Image sprintImage;
     [SerializeField] private Animator animator;
@@ -43,6 +46,12 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float powerUpDetectionRadius;
 
+    [Header("Player indicator")]
+    [SerializeField] private Renderer colorIndicator;
+
+    [field:SerializeField] public ThrowableObject Throwable { get; set; }
+    [field:SerializeField] public HandAnimator handAnimator { get; private set; }
+
     private CharacterController characterController;
     private Vector2 moveInput;
     private Vector3 jumpVector;
@@ -59,6 +68,7 @@ public class PlayerController : MonoBehaviour
     public bool IsEliminated { get; set; }
     public bool Reached { get; set; }
     public bool IsFrozen { get; set; }
+    public Color PlayerColor { get; set; }
 
     public static event Action<PlayerController> OnReachedBeacon;
 
@@ -68,6 +78,15 @@ public class PlayerController : MonoBehaviour
 
         MainGameManager.Instance.PlayerJoined(this);
 
+        CameraLayerSettings();
+        colorIndicator.material.color = PlayerColor;
+
+        GameController.OnNextStageStarted += OnNextStageStarted;
+        GameController.OnReachCountUpdate += OnReachCountUpdate;
+    }
+
+    private void CameraLayerSettings()
+    {
         var layerMask = MainGameManager.Instance.PlayerLayers[PlayerIndex];
         int layerToAdd = (int)Mathf.Log(layerMask.value, 2);
         //set the layer
@@ -80,9 +99,6 @@ public class PlayerController : MonoBehaviour
             int layerToRemove = (int)Mathf.Log(layer.value, 2);
             playerCamera.cullingMask &= ~(1 << layerToRemove);
         }
-
-        GameController.OnNextStageStarted += OnNextStageStarted;
-        GameController.OnReachCountUpdate += OnReachCountUpdate;
     }
 
     private void OnReachCountUpdate(int current, int total)
@@ -148,6 +164,8 @@ public class PlayerController : MonoBehaviour
     public void TemporaryBoostForSpeed(float mult)
     {
         speedMult = mult;
+
+        IsFrozen = mult == 0;
     }
 
     public void MoveTo(Transform location)
@@ -162,7 +180,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-        if(IsFrozen) return;
+        if (IsFrozen) return;
         groundedPlayer = characterController.isGrounded;
         if (groundedPlayer && jumpVector.y < 0)
         {
@@ -176,16 +194,10 @@ public class PlayerController : MonoBehaviour
 
 
         transform.Rotate(Vector3.up, moveInput.x * rotationSpeed * Time.deltaTime);
-        if (moveDirection != Vector3.zero)
-        {
-        
-            animator.SetBool("running", true);
-        }
-        else
-        {
-            animator.SetBool("running", false);
-        }
-        
+
+        animator.SetBool("running", moveDirection != Vector3.zero);
+        animator.SetBool("walking", moveDirection == Vector3.zero && moveInput.x != 0);
+
 
         moveDirection *= (isSprinting ? sprintBoost : moveSpeed) * speedMult;
 
@@ -226,6 +238,15 @@ public class PlayerController : MonoBehaviour
         sprintImage.fillAmount = sprintTime / sprintDuration;
     }
 
+    public void OnThrow(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed && Throwable != null)
+        {
+            handAnimator.StopHolding(Throwable, transform.forward);
+            Throwable = null;
+        }
+    }
+
     public void OnSprint(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
@@ -254,6 +275,8 @@ public class PlayerController : MonoBehaviour
         IsEliminated = true;
         selectedColorImage.gameObject.SetActive(false);
         eliminationPanel.SetActive(true);
+        characterController.enabled = false;
         animator.SetBool("running", false);
+        animator.SetTrigger("dead");
     }
 }

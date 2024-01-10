@@ -7,7 +7,7 @@ public class ParticleEffect : MonoBehaviour
 
     private Dictionary<int, GameObject> particles;
 
-    private void Start()
+    private void Awake()
     {
         particles = new Dictionary<int, GameObject>();
     }
