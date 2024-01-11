@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 619554edf08f24442a23cfd85ae86b2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boostEffect: 0
+  boostEffect: 1.8
 --- !u!114 &2621890949855407172
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114,7 +114,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 619554edf08f24442a23cfd85ae86b2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boostEffect: 1
+  boostEffect: 0.5555556
 --- !u!114 &2621890949855407173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -191,7 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18e3603a6a1b71044abdd4427593972a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  particleEffect: {fileID: 6126188424833946103, guid: a58aa9a78f2b45b45bb0f3e2e1e3ad3c,
+  particleEffect: {fileID: 7155335147208632822, guid: 97c43495f80a3244fad1301dfafbe252,
     type: 3}
 --- !u!114 &4750820590546741837
 MonoBehaviour:
