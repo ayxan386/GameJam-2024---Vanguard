@@ -10,7 +10,8 @@ public class UIAnimator : MonoBehaviour
         {
             Scale,
             Move,
-            Fade
+            Fade,
+            Rotate
         }
     
         [SerializeField] private AnimationType animationType = AnimationType.Scale;
