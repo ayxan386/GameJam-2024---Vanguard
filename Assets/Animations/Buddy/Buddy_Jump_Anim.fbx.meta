@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 6dfb4a8a94e381e4eb4a2e855b8e7ef9
+guid: 6d039aa7b8e311f42b830ce59c217a09
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
@@ -33,19 +33,19 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Run
-      takeName: mixamo.com
-      internalID: -203655887218126122
-      firstFrame: 0
-      lastFrame: 21
+      name: Buddy_jump
+      takeName: Take 001
+      internalID: 1827226128182048838
+      firstFrame: 17
+      lastFrame: 60
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
-      loopBlend: 1
+      loopTime: 0
+      loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
       loopBlendPositionXZ: 0
@@ -122,7 +122,7 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 31463857b270e6b40bcb9348f37593f8,
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: 40ee1ff5a6c3251439d51b3da8dc90ec,
     type: 3}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2

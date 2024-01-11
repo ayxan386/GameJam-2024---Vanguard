@@ -49,6 +49,8 @@ public class PlayerController : MonoBehaviour
     [Header("Player indicator")]
     [SerializeField] private Renderer colorIndicator;
 
+    [SerializeField] private Transform rigs;
+
     [field:SerializeField] public ThrowableObject Throwable { get; set; }
     [field:SerializeField] public HandAnimator handAnimator { get; private set; }
 
@@ -83,6 +85,11 @@ public class PlayerController : MonoBehaviour
 
         GameController.OnNextStageStarted += OnNextStageStarted;
         GameController.OnReachCountUpdate += OnReachCountUpdate;
+
+        var rig = rigs.GetChild(PlayerIndex);
+        rig.gameObject.SetActive(true);
+        animator = rig.GetComponent<Animator>();
+        handAnimator = rig.GetComponent<HandAnimator>();
     }
 
     private void CameraLayerSettings()
