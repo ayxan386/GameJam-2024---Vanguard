@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4103295763033742665}
   - component: {fileID: 4103295763033742664}
   - component: {fileID: 4103295763033742667}
+  - component: {fileID: 8298350990394120698}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -158,6 +159,14 @@ MonoBehaviour:
   - selectedBeaconCount: 11
   - selectedBeaconCount: 11
   winningScore: 5
+--- !u!81 &8298350990394120698
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4103295763033742671}
+  m_Enabled: 1
 --- !u!1 &4103295763325675081
 GameObject:
   m_ObjectHideFlags: 0

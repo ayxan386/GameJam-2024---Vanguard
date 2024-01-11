@@ -75,6 +75,7 @@ public class PlayerController : MonoBehaviour
     public bool Reached { get; set; }
     public bool IsFrozen { get; set; }
     public Color PlayerColor { get; set; }
+    public Animator Animator => animator;
 
     public static event Action<PlayerController> OnReachedBeacon;
 
