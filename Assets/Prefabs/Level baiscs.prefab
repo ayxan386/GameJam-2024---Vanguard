@@ -157,6 +157,7 @@ MonoBehaviour:
   - selectedBeaconCount: 11
   - selectedBeaconCount: 11
   - selectedBeaconCount: 11
+  winningScore: 5
 --- !u!1 &4103295763325675081
 GameObject:
   m_ObjectHideFlags: 0

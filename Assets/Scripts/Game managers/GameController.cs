@@ -17,15 +17,14 @@ public class GameController : MonoBehaviour
     [SerializeField] private float waitBetweenStages;
     [SerializeField] private int selectedColor;
     [SerializeField] private List<GameStage> stages;
+    [SerializeField] private int winningScore = 5;
 
     private List<Vector3> emptyPoints;
     private List<Renderer> beacons;
     private int totalActiveAtStartOfStage;
-    private int currentReached;
     private bool CanContinue { get; set; }
 
     public static event Action<Color> OnNextStageStarted;
-    public static event Action<int, int> OnReachCountUpdate;
     public static event Action<int> OnPlayerVictory;
 
     private IEnumerator Start()
@@ -47,28 +46,29 @@ public class GameController : MonoBehaviour
 
     private void OnPlayerReachedBeacon(PlayerController obj)
     {
-        currentReached++;
-        currentReached = Mathf.Clamp(currentReached, 0, totalActiveAtStartOfStage);
-
-        if (currentReached + 1 >= totalActiveAtStartOfStage)
+        obj.OnScoreUpdate(obj.Score, winningScore);
+        
+        if (obj.Score == winningScore)
         {
             foreach (var player in MainGameManager.Instance.Players)
             {
-                if (!player.Reached)
-                {
-                    player.SetEliminated();
-                }
+                if (player != obj) player.SetEliminated();
             }
-
-            CanContinue = true;
+            OnPlayerVictory?.Invoke(obj.PlayerIndex);
+            return;
         }
+        CanContinue = true;
 
-        OnReachCountUpdate?.Invoke(currentReached, totalActiveAtStartOfStage);
     }
 
     private IEnumerator GameLoop()
     {
         if (beacons.Count <= 0) yield break;
+        
+        foreach (var playerController in MainGameManager.Instance.Players)
+        {
+            playerController.OnScoreUpdate(playerController.Score, winningScore);
+        }
 
         foreach (var stage in stages)
         {
@@ -78,22 +78,6 @@ public class GameController : MonoBehaviour
             {
                 beacon.gameObject.SetActive(false);
             }
-
-            totalActiveAtStartOfStage = 0;
-            currentReached = 0;
-
-            foreach (var playerController in MainGameManager.Instance.Players)
-            {
-                if (!playerController.IsEliminated) totalActiveAtStartOfStage++;
-            }
-
-            if (totalActiveAtStartOfStage == 1)
-            {
-                OnPlayerVictory?.Invoke(totalActiveAtStartOfStage);
-                yield break;
-            }
-
-            OnReachCountUpdate?.Invoke(currentReached, totalActiveAtStartOfStage);
 
             for (int count = 0; count < stage.selectedBeaconCount; count++)
             {

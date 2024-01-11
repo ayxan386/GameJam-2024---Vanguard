@@ -54,8 +54,9 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private Transform rigs;
 
-    [field:SerializeField] public ThrowableObject Throwable { get; set; }
-    [field:SerializeField] public HandAnimator handAnimator { get; private set; }
+    [field: SerializeField] public ThrowableObject Throwable { get; set; }
+    [field: SerializeField] public HandAnimator handAnimator { get; private set; }
+    public int Score { get; private set; }
 
     private CharacterController characterController;
     private Vector2 moveInput;
@@ -87,7 +88,6 @@ public class PlayerController : MonoBehaviour
         colorIndicator.material.color = PlayerColor;
 
         GameController.OnNextStageStarted += OnNextStageStarted;
-        GameController.OnReachCountUpdate += OnReachCountUpdate;
         GameController.OnPlayerVictory += OnPlayerVictory;
 
         var rig = rigs.GetChild(PlayerIndex);
@@ -99,7 +99,6 @@ public class PlayerController : MonoBehaviour
     private void OnDestroy()
     {
         GameController.OnNextStageStarted -= OnNextStageStarted;
-        GameController.OnReachCountUpdate -= OnReachCountUpdate;
         GameController.OnPlayerVictory -= OnPlayerVictory;
     }
 
@@ -108,16 +107,15 @@ public class PlayerController : MonoBehaviour
     {
         SceneManager.LoadScene("Map_01");
     }
-    
+
     private void OnPlayerVictory(int obj)
     {
-        if(IsEliminated) return;
-        
+        if (IsEliminated) return;
+
         print(victoryPanel);
-       
+
         victoryPanel.SetActive(true);
         backToMainMenu.Select();
-        
     }
 
     private void CameraLayerSettings()
@@ -136,7 +134,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void OnReachCountUpdate(int current, int total)
+    public void OnScoreUpdate(int current, int total)
     {
         reachCountText.text = $"{current}/{total}";
     }
@@ -190,6 +188,7 @@ public class PlayerController : MonoBehaviour
                 if (rend.material.color == selectedColor)
                 {
                     Reached = true;
+                    Score++;
                     OnReachedBeacon?.Invoke(this);
                 }
             }
@@ -207,8 +206,7 @@ public class PlayerController : MonoBehaviour
     {
         characterController.enabled = false;
 
-        transform.position = location.position;
-        transform.rotation = location.rotation;
+        transform.SetPositionAndRotation(location.position, location.rotation);
 
         characterController.enabled = true;
     }
