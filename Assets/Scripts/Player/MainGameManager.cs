@@ -42,7 +42,7 @@ public class MainGameManager : MonoBehaviour
         player.PlayerColor = playerColors[playerIndex];
 
         Instantiate(joinedIndicatorPrefab, indicatorParent).UpdateDisplay(
-            playerColors[playerIndex], $"P{playerIndex + 1}" , playerSkins[playerIndex]);
+            playerColors[playerIndex], $"P{playerIndex + 1}", playerSkins[playerIndex]);
 
         player.MoveTo(spawnLocation);
     }
@@ -57,4 +57,5 @@ public class MainGameManager : MonoBehaviour
     {
         Instance = this;
     }
+
 }

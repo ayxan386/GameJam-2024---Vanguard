@@ -40,6 +40,11 @@ public class GameController : MonoBehaviour
         StartCoroutine(GameLoop());
     }
 
+    private void OnDestroy()
+    {
+        PlayerController.OnReachedBeacon -= OnPlayerReachedBeacon;
+    }
+
     private void OnPlayerReachedBeacon(PlayerController obj)
     {
         currentReached++;

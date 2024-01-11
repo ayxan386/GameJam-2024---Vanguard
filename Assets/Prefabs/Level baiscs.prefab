@@ -102,9 +102,9 @@ MonoBehaviour:
   - {r: 0, g: 0.054534435, b: 1, a: 1}
   - {r: 0, g: 1, b: 0.9027302, a: 1}
   playerSkins:
-  - {fileID: 21300000, guid: 47fcf0e34cc84da4f91f86323daf7332, type: 3}
-  - {fileID: 21300000, guid: 47fcf0e34cc84da4f91f86323daf7332, type: 3}
   - {fileID: 21300000, guid: e7f8cd6f54fd66b4faac5015a523ae84, type: 3}
+  - {fileID: 21300000, guid: 47fcf0e34cc84da4f91f86323daf7332, type: 3}
+  - {fileID: 21300000, guid: 47fcf0e34cc84da4f91f86323daf7332, type: 3}
   - {fileID: 21300000, guid: e7f8cd6f54fd66b4faac5015a523ae84, type: 3}
   spawnLocation: {fileID: 0}
   <PlayerLayers>k__BackingField:

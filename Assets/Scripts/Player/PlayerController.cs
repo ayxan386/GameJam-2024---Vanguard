@@ -96,6 +96,13 @@ public class PlayerController : MonoBehaviour
         handAnimator = rig.GetComponent<HandAnimator>();
     }
 
+    private void OnDestroy()
+    {
+        GameController.OnNextStageStarted -= OnNextStageStarted;
+        GameController.OnReachCountUpdate -= OnReachCountUpdate;
+        GameController.OnPlayerVictory -= OnPlayerVictory;
+    }
+
 
     public void Restart()
     {
@@ -105,6 +112,8 @@ public class PlayerController : MonoBehaviour
     private void OnPlayerVictory(int obj)
     {
         if(IsEliminated) return;
+        
+        print(victoryPanel);
        
         victoryPanel.SetActive(true);
         backToMainMenu.Select();
@@ -134,7 +143,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnNextStageStarted(Color color)
     {
-        if (IsEliminated) return;
+        if (IsEliminated || selectedColorImage == null) return;
         selectedColor = color;
         color.a = 1f;
         selectedColorImage.color = color;
