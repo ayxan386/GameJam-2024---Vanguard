@@ -21,6 +21,6 @@ public class MainMenuManager : MonoBehaviour
     {
         loadingSpinner.SetActive(true);
         yield return new WaitForSeconds(waitDur);
-        SceneManager.LoadScene("TestScene");
+        SceneManager.LoadScene("Map_01");
     }
 }
