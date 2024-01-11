@@ -3,6 +3,7 @@ using Cinemachine;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -39,6 +40,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Image selectedColorImage;
 
     [SerializeField] private GameObject eliminationPanel;
+    [SerializeField] private GameObject victoryPanel;
+    [SerializeField] private Button backToMainMenu;
     [SerializeField] private TextMeshProUGUI reachCountText;
 
     [Header("Power ups")]
@@ -85,11 +88,27 @@ public class PlayerController : MonoBehaviour
 
         GameController.OnNextStageStarted += OnNextStageStarted;
         GameController.OnReachCountUpdate += OnReachCountUpdate;
+        GameController.OnPlayerVictory += OnPlayerVictory;
 
         var rig = rigs.GetChild(PlayerIndex);
         rig.gameObject.SetActive(true);
         animator = rig.GetComponent<Animator>();
         handAnimator = rig.GetComponent<HandAnimator>();
+    }
+
+
+    public void Restart()
+    {
+        SceneManager.LoadScene("Map_01");
+    }
+    
+    private void OnPlayerVictory(int obj)
+    {
+        if(IsEliminated) return;
+       
+        victoryPanel.SetActive(true);
+        backToMainMenu.Select();
+        
     }
 
     private void CameraLayerSettings()

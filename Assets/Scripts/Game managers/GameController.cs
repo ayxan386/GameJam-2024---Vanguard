@@ -6,16 +6,8 @@ using Random = UnityEngine.Random;
 
 public class GameController : MonoBehaviour
 {
-    // [Header("Ground detection")]
-    // [SerializeField] private Transform bottomLeft, bottomRight, topLeft;
-    //
-    // [SerializeField] private Vector2Int stepSize;
-    // [SerializeField] private float checkRadius;
-    // [SerializeField] private LayerMask groundLayer;
-    //
-    // [SerializeField] private bool showGizmos;
-
     [SerializeField] private List<Transform> lightPoints;
+
     [Header("Game play")]
     [SerializeField] private Renderer beaconPrefab;
 
@@ -34,6 +26,7 @@ public class GameController : MonoBehaviour
 
     public static event Action<Color> OnNextStageStarted;
     public static event Action<int, int> OnReachCountUpdate;
+    public static event Action<int> OnPlayerVictory;
 
     private IEnumerator Start()
     {
@@ -70,8 +63,8 @@ public class GameController : MonoBehaviour
 
     private IEnumerator GameLoop()
     {
-        if(beacons.Count <= 0) yield break;
-        
+        if (beacons.Count <= 0) yield break;
+
         foreach (var stage in stages)
         {
             yield return new WaitForSeconds(waitBetweenStages);
@@ -87,6 +80,12 @@ public class GameController : MonoBehaviour
             foreach (var playerController in MainGameManager.Instance.Players)
             {
                 if (!playerController.IsEliminated) totalActiveAtStartOfStage++;
+            }
+
+            if (totalActiveAtStartOfStage == 1)
+            {
+                OnPlayerVictory?.Invoke(totalActiveAtStartOfStage);
+                yield break;
             }
 
             OnReachCountUpdate?.Invoke(currentReached, totalActiveAtStartOfStage);
@@ -117,27 +116,6 @@ public class GameController : MonoBehaviour
         }
     }
 
-    // [ContextMenu("Find all points")]
-    // public void FindAllPoints()
-    // {
-    //     emptyPoints = new List<Vector3>();
-    //     for (int posY = 0; posY <= stepSize.y; posY++)
-    //     {
-    //         var bottomLeftPosition = bottomLeft.position;
-    //         var offset = Vector3.Lerp(bottomLeftPosition, topLeft.position, 1f * posY / stepSize.y) -
-    //                      bottomLeftPosition;
-    //         for (int posX = 0; posX <= stepSize.x; posX++)
-    //         {
-    //             var pos = Vector3.Lerp(bottomLeftPosition, bottomRight.position, 1f * posX / stepSize.x) + offset;
-    //
-    //             if (Physics.CheckSphere(pos, checkRadius, groundLayer))
-    //             {
-    //                 emptyPoints.Add(pos);
-    //             }
-    //         }
-    //     }
-    // }
-
     private void SpawnAllBeacons()
     {
         beacons = new List<Renderer>();
@@ -148,13 +126,10 @@ public class GameController : MonoBehaviour
             beacons.Add(beacon);
         }
     }
-
-
 }
 
 [Serializable]
 public class GameStage
 {
-    // public int totalBeaconCount;
     public int selectedBeaconCount;
 }

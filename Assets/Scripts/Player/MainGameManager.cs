@@ -1,17 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainGameManager : MonoBehaviour
 {
-    [SerializeField] private GameObject mainCamera;
-
     [Header("Joining indicators")]
+    [SerializeField] private Button startGameButton;
+
     [SerializeField] private GameObject joiningScreen;
 
     [SerializeField] private JoinedIndicator joinedIndicatorPrefab;
 
     [SerializeField] private Transform indicatorParent;
     [SerializeField] private Color[] playerColors;
+    [SerializeField] private Sprite[] playerSkins;
     [SerializeField] private Transform spawnLocation;
 
 
@@ -31,13 +33,16 @@ public class MainGameManager : MonoBehaviour
             Players = new List<PlayerController>();
         }
 
+        startGameButton.interactable = true;
+        startGameButton.Select();
+
         Players.Add(player);
 
         var playerIndex = player.PlayerIndex;
         player.PlayerColor = playerColors[playerIndex];
 
         Instantiate(joinedIndicatorPrefab, indicatorParent).UpdateDisplay(
-            playerColors[playerIndex], $"P{playerIndex + 1}");
+            playerColors[playerIndex], $"P{playerIndex + 1}" , playerSkins[playerIndex]);
 
         player.MoveTo(spawnLocation);
     }
