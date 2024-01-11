@@ -101,7 +101,7 @@ public class GameController : MonoBehaviour
         emptyPoints = new List<Vector3>();
         foreach (var point in lightPoints)
         {
-            emptyPoints.Add(point.position);
+            emptyPoints.Add(point.position + Vector3.up * 7.2f);
         }
     }
 

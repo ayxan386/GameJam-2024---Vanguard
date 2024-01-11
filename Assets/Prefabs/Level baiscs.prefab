@@ -129,7 +129,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lightPoints: []
-  beaconPrefab: {fileID: 2007660749898320943, guid: d792e76bad936234da86fed057d1874c,
+  beaconPrefab: {fileID: 3225937286685064067, guid: d792e76bad936234da86fed057d1874c,
     type: 3}
   beaconParent: {fileID: 0}
   beaconColors:
